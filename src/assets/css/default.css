@@ -1,0 +1,101 @@
+.container {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-align-items: center;
+  align-items: center;
+  -webkit-flex-direction: column;
+  flex-direction: column;
+}
+.board {
+  width: 480px;
+  height: 480px;
+  border: none;
+  margin: 20px 20px;
+}
+.box {
+  width: 60px;
+  height: 60px;
+}
+.letter-x {
+  width: 60px;
+  text-align: center;
+}
+.letter-y {
+  height: 60px;
+  line-height: 60px;
+}
+.white {
+  background-color: #ffce9e;
+}
+.black {
+  background-color: #d18b47;
+}
+.white-king {
+  background-image:url(../piece/wK.svg);
+  background-size:100%;
+}
+.white-queen {
+  background-image:url(../piece/wQ.svg);
+  background-size:100%;
+}
+.white-rook {
+  background-image:url(../piece/wR.svg);
+  background-size:100%;
+}
+.white-knight {
+  background-image:url(../piece/wN.svg);
+  background-size:100%;
+}
+.white-bishop {
+  background-image:url(../piece/wB.svg);
+  background-size:100%;
+}
+.white-pawn {
+  background-image:url(../piece/wP.svg);
+  background-size:100%;
+}
+.black-king {
+  background-image:url(../piece/bK.svg);
+  background-size:100%;
+}
+.black-queen {
+  background-image:url(../piece/bQ.svg);
+  background-size:100%;
+}
+.black-rook {
+  background-image:url(../piece/bR.svg);
+  background-size:100%;
+}
+.black-knight {
+  background-image:url(../piece/bN.svg);
+  background-size:100%;
+}
+.black-bishop {
+  background-image:url(../piece/bB.svg);
+  background-size:100%;
+}
+.black-pawn {
+  background-image:url(../piece/bP.svg);
+  background-size:100%;
+}
+
+.text-left {
+  text-align: left;
+}
+.text-right {
+  text-align: right;
+}
+.text-center {
+  text-align: center;
+}
+.bold {
+  font-weight: bold;
+}
+.row {
+  display: flex;
+}
+.center {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}

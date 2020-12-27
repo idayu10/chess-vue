@@ -1,0 +1,26 @@
+{
+  "existence": [
+    {
+      "label": "×",
+      "value": "0"
+    },
+    {
+      "label": "○",
+      "value": "1"
+    },
+    {
+      "label": "△",
+      "value": "2"
+    }
+  ],
+  "having": [
+    {
+      "label": "無し",
+      "value": "0"
+    },
+    {
+      "label": "有り",
+      "value": "1"
+    }
+  ]
+}
