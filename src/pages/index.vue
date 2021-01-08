@@ -68,10 +68,6 @@ export default class Index extends Vue {
     this.highlight.push([row, column]);
 
     switch (this.board[row][column].split('-')[1]) {
-      // TODO:pawn
-      case 'pawn':
-        this.moveStraight(row, column);
-        break;
       case 'rook':
         this.moveStraight(row, column);
         break;
@@ -81,6 +77,15 @@ export default class Index extends Vue {
       case 'queen':
         this.moveStraight(row, column);
         this.moveCrossly(row, column);
+        break;
+      case 'knight':
+        this.moveKnight(row, column);
+        break;
+      case 'king':
+        this.moveKing(row, column);
+        break;
+      case 'pawn':
+        this.movePawn(row, column);
         break;
       default:
         break;
@@ -183,6 +188,72 @@ export default class Index extends Vue {
         this.highlight.push([row - i, column - i]);
         break;
       }
+    }
+  }
+
+  moveKnight(row: number, column: number): void {
+    const highlightTmp: number[][] = [];
+    highlightTmp.push([row - 2, column + 1]);
+    highlightTmp.push([row - 1, column + 2]);
+    highlightTmp.push([row + 1, column + 2]);
+    highlightTmp.push([row + 2, column + 1]);
+    highlightTmp.push([row + 2, column - 1]);
+    highlightTmp.push([row + 1, column - 2]);
+    highlightTmp.push([row - 2, column - 1]);
+    highlightTmp.push([row - 1, column - 2]);
+
+    for (let item of highlightTmp) {
+      if (item[0] < 0 || item[1] < 0 || 7 < item[0] || 7 < item[1]) {
+        continue;
+      }
+      if (this.board[row][column].split('-')[0] === this.board[item[0]][item[1]].split('-')[0]) {
+        continue;
+      }
+
+      this.highlight.push(item);
+    }
+  }
+
+  moveKing(row: number, column: number): void {
+    const highlightTmp: number[][] = [];
+    highlightTmp.push([row + 1, column]);
+    highlightTmp.push([row + 1, column + 1]);
+    highlightTmp.push([row, column + 1]);
+    highlightTmp.push([row - 1, column + 1]);
+    highlightTmp.push([row - 1, column]);
+    highlightTmp.push([row + 1, column - 1]);
+    highlightTmp.push([row, column - 1]);
+    highlightTmp.push([row - 1, column - 1]);
+
+    for (let item of highlightTmp) {
+      if (item[0] < 0 || item[1] < 0 || 7 < item[0] || 7 < item[1]) {
+        continue;
+      }
+      if (this.board[row][column].split('-')[0] === this.board[item[0]][item[1]].split('-')[0]) {
+        continue;
+      }
+
+      this.highlight.push(item);
+    }
+  }
+
+  movePawn(row: number, column: number): void {
+    const move: number = this.board[row][column].split('-')[0] === 'white' ? -1 : 1;
+    if ((move === -1 && row == 6) || move === 1 && row == 1) {
+      if (this.board[row + move * 2][column] === piece.NONE) {
+        this.highlight.push([row + move * 2, column]);
+      }
+    }
+    if (this.board[row + move][column] === piece.NONE) {
+      this.highlight.push([row + move, column]);
+    }
+    if (0 < column - 1 && this.board[row + move][column -1] !== piece.NONE
+      && this.board[row][column].split('-')[0] !== this.board[row + move][column - 1].split('-')[0]) {
+        this.highlight.push([row + move, column - 1]);
+    }
+    if (column + 1 < 8 && this.board[row + move][column + 1] !== piece.NONE
+      && this.board[row][column].split('-')[0] !== this.board[row + move][column + 1].split('-')[0]) {
+        this.highlight.push([row + move, column + 1]);
     }
   }
 
