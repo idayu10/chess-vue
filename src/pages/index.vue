@@ -1,12 +1,17 @@
 <template>
   <div class="container">
     <top-header/>
-    <board/>
+    <board
+      :board="board"
+      :highlight="highlight"
+      @emit-click="emitClick"
+    />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator';
+import piece from '@/resources/const/piece';
 
 @Component({
   components: {
@@ -15,86 +20,194 @@ import { Component, Vue } from 'nuxt-property-decorator';
   }
 })
 export default class Index extends Vue {
-  private readonly NONE: string = 'none';
-  private readonly W_KING: string = 'wk';
-  private readonly W_QUEEN: string = 'wq';
-  private readonly W_ROOK: string = 'wr';
-  private readonly W_KNIGHT: string = 'wn';
-  private readonly W_BISHOP: string = 'wb';
-  private readonly W_PAWN: string = 'wp';
-  private readonly B_KING: string = 'bk';
-  private readonly B_QUEEN: string = 'bq';
-  private readonly B_ROOK: string = 'br';
-  private readonly B_KNIGHT: string = 'bn';
-  private readonly B_BISHOP: string = 'bb';
-  private readonly B_PAWN: string = 'bp';
-  private readonly PIECE_CLASS:{[key: string]: string} = {
-    none: 'none',
-    wk: 'white-king',
-    wq: 'white-queen',
-    wr: 'white-rook',
-    wn: 'white-knight',
-    wb: 'white-bishop',
-    wp: 'white-pawn',
-    bk: 'black-king',
-    bq: 'black-queen',
-    br: 'black-rook',
-    bn: 'black-knight',
-    bb: 'black-bishop',
-    bp: 'black-pawn'
-  }
   board: string[][] = [];
+  highlight: number[][] = [];
 
-  mounted():void {
+  created():void {
     this.clearBoard();
     this.resetBoard();
-    this.showBoard();
   }
 
   clearBoard(): void {
     for (let row = 0; row < 8; row++) {
       this.board[row] = [];
       for (let column = 0; column < 8; column++) {
-        this.board[row][column] = this.NONE;
+        this.board[row][column] = piece.NONE;
       }
     }
   }
 
   resetBoard(): void {
     this.board = [
-      [this.B_ROOK, this.B_KNIGHT, this.B_BISHOP, this.B_QUEEN, this.B_KING, this.B_BISHOP, this.B_KNIGHT,this.B_ROOK],
-      [this.B_PAWN, this.B_PAWN, this.B_PAWN, this.B_PAWN, this.B_PAWN, this.B_PAWN, this.B_PAWN, this.B_PAWN],
-      [this.NONE, this.NONE, this.NONE, this.NONE, this.NONE, this.NONE, this.NONE, this.NONE],
-      [this.NONE, this.NONE, this.NONE, this.NONE, this.NONE, this.NONE, this.NONE, this.NONE],
-      [this.NONE, this.NONE, this.NONE, this.NONE, this.NONE, this.NONE, this.NONE, this.NONE],
-      [this.NONE, this.NONE, this.NONE, this.NONE, this.NONE, this.NONE, this.NONE, this.NONE],
-      [this.W_PAWN, this.W_PAWN, this.W_PAWN, this.W_PAWN, this.W_PAWN, this.W_PAWN, this.W_PAWN, this.W_PAWN],
-      [this.W_ROOK, this.W_KNIGHT, this.W_BISHOP, this.W_QUEEN, this.W_KING, this.W_BISHOP, this.W_KNIGHT,this.W_ROOK]
+      [piece.B_ROOK, piece.B_KNIGHT, piece.B_BISHOP, piece.B_QUEEN, piece.B_KING, piece.B_BISHOP, piece.B_KNIGHT,piece.B_ROOK],
+      [piece.B_PAWN, piece.B_PAWN, piece.B_PAWN, piece.B_PAWN, piece.B_PAWN, piece.B_PAWN, piece.B_PAWN, piece.B_PAWN],
+      [piece.NONE, piece.NONE, piece.NONE, piece.NONE, piece.NONE, piece.NONE, piece.NONE, piece.NONE],
+      [piece.NONE, piece.NONE, piece.NONE, piece.NONE, piece.NONE, piece.NONE, piece.NONE, piece.NONE],
+      [piece.NONE, piece.NONE, piece.NONE, piece.NONE, piece.NONE, piece.NONE, piece.NONE, piece.NONE],
+      [piece.NONE, piece.NONE, piece.NONE, piece.NONE, piece.NONE, piece.NONE, piece.NONE, piece.NONE],
+      [piece.W_PAWN, piece.W_PAWN, piece.W_PAWN, piece.W_PAWN, piece.W_PAWN, piece.W_PAWN, piece.W_PAWN, piece.W_PAWN],
+      [piece.W_ROOK, piece.W_KNIGHT, piece.W_BISHOP, piece.W_QUEEN, piece.W_KING, piece.W_BISHOP, piece.W_KNIGHT,piece.W_ROOK]
     ]
   }
 
-  showBoard(): void {
-    const board: Element = document.getElementsByClassName('board').item(0)!;
-    for (let row = 0; row < 8; row++) {
-      const rowEle = board.children.item(row);
-      for (let column = 1; column < 9; column++) {
-        const item = rowEle!.children.item(column);
-        this.changeStatus(item!, this.board[row][column-1]);
+  emitClick(row: number, column: number) {
+    if (this.highlight.length === 0) {
+      // 可能手の検索
+      this.searchBoard(row, column);
+    } else {
+      // 駒の移動
+      this.putPiece(row, column);
+    }
+  }
+
+  searchBoard(row: number, column: number): void {
+    if (this.board[row][column] === piece.NONE) {
+      return;
+    }
+    this.highlight = [];
+    this.highlight.push([row, column]);
+
+    switch (this.board[row][column].split('-')[1]) {
+      // TODO:pawn
+      case 'pawn':
+        this.moveStraight(row, column);
+        break;
+      case 'rook':
+        this.moveStraight(row, column);
+        break;
+      case 'bishop':
+        this.moveCrossly(row, column);
+        break;
+      case 'queen':
+        this.moveStraight(row, column);
+        this.moveCrossly(row, column);
+        break;
+      default:
+        break;
+    }
+    console.log(this.highlight)
+  }
+
+  moveStraight(row: number, column: number): void {
+    // 上
+    for (let i = row - 1; 0 <= i; i--) {
+      if (this.board[i][column] === piece.NONE) {
+        this.highlight.push([i, column]);
+      } else if (this.board[row][column].split('-')[0] === this.board[i][column].split('-')[0]) {
+        break;
+      } else {
+        this.highlight.push([i, column]);
+        break;
+      }
+    }
+    // 右
+    for (let i = column + 1; i < 8; i++) {
+      if (this.board[row][i] === piece.NONE) {
+        this.highlight.push([row, i]);
+      } else if (this.board[row][column].split('-')[0] === this.board[row][i].split('-')[0]) {
+        break;
+      } else {
+        this.highlight.push([row, i]);
+        break;
+      }
+    }
+    // 下
+    for (let i = row + 1; i < 8; i++) {
+      if (this.board[i][column] === piece.NONE) {
+        this.highlight.push([i, column]);
+      } else if (this.board[row][column].split('-')[0] === this.board[i][column].split('-')[0]) {
+        break;
+      } else {
+        this.highlight.push([i, column]);
+        break;
+      }
+    }
+    // 左
+    for (let i = column - 1; 0 <= i; i--) {
+      if (this.board[row][i] === piece.NONE) {
+        this.highlight.push([row, i]);
+      } else if (this.board[row][column].split('-')[0] === this.board[row][i].split('-')[0]) {
+        break;
+      } else {
+        this.highlight.push([row, i]);
+        break;
       }
     }
   }
 
-  changeStatus(element: Element, piece: string): void {
-    const classes = element.className.split(' ');
-    for (let classVal of Object.values(this.PIECE_CLASS)) {
-      const index = classes.findIndex(item => item === classVal);
-      if (index !== -1) {
-        classes.splice(index, 1);
-        classes.push(this.PIECE_CLASS[piece]);
-        element.className = classes.join(' ');
+  moveCrossly(row: number, column: number): void {
+    // 右上
+    let minLine = Math.min(row, 7 - column);
+    for (let i = 1; i <= minLine; i++) {
+      if (this.board[row - i][column + i] === piece.NONE) {
+        this.highlight.push([row - i, column + i]);
+      } else if (this.board[row][column].split('-')[0] === this.board[row - i][column + i].split('-')[0]) {
+        break;
+      } else {
+        this.highlight.push([row - i, column + i]);
         break;
       }
     }
+    // 右下
+    minLine = Math.min(7 - row, 7 - column);
+    for (let i = 1; i <= minLine; i++) {
+      if (this.board[row + i][column + i] === piece.NONE) {
+        this.highlight.push([row + i, column + i]);
+      } else if (this.board[row][column].split('-')[0] === this.board[row + i][column + i].split('-')[0]) {
+        break;
+      } else {
+        this.highlight.push([row + i, column + i]);
+        break;
+      }
+    }
+    // 左下
+    minLine = Math.min(7 - row, column);
+    for (let i = 1; i <= minLine; i++) {
+      if (this.board[row + i][column - i] === piece.NONE) {
+        this.highlight.push([row + i, column - i]);
+      } else if (this.board[row][column].split('-')[0] === this.board[row + i][column - i].split('-')[0]) {
+        break;
+      } else {
+        this.highlight.push([row + i, column - i]);
+        break;
+      }
+    }
+    // 左上
+    minLine = Math.min(row, column);
+    for (let i = 1; i <= minLine; i++) {
+      if (this.board[row - i][column - i] === piece.NONE) {
+        this.highlight.push([row - i, column - i]);
+      } else if (this.board[row][column].split('-')[0] === this.board[row - i][column - i].split('-')[0]) {
+        break;
+      } else {
+        this.highlight.push([row - i, column - i]);
+        break;
+      }
+    }
+  }
+
+  putPiece(row: number, column: number): void {
+    const idx = this.highlight.findIndex(tmp => {
+      return tmp[0] === row && tmp[1] === column;
+    });
+    if (idx === -1 || idx === 0) {
+      this.highlight = [];
+      return;
+    }
+
+    const highlight0 = this.highlight[0];
+    // 移動元ピースの特定
+    const source = this.board[highlight0[0]][highlight0[1]];
+    // 移動元の削除
+    const sourceRow = this._.cloneDeep(this.board[highlight0[0]]);
+    sourceRow[highlight0[1]] = piece.NONE;
+    this.board.splice(highlight0[0], 1, sourceRow);
+    // 移動
+    const targetRow = this._.cloneDeep(this.board[row]);
+    targetRow[column] = source;
+    this.board.splice(row, 1, targetRow);
+
+    this.highlight = [];
   }
 }
 </script>

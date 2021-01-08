@@ -30,6 +30,12 @@
 .black {
   background-color: #d18b47;
 }
+.yellow {
+  background-color: yellow;
+}
+.red {
+  background-color: red;
+}
 .white-king {
   background-image:url(../piece/wK.svg);
   background-size:100%;
