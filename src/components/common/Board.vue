@@ -54,7 +54,6 @@ export default class Board extends Vue{
   }
 
   emitClick(row: number, column: number) {
-    console.log(row.toString() + ', ' + column.toString());
     this.$emit('emit-click', row, column);
   }
 }

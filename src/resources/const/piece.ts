@@ -1,5 +1,13 @@
 export default Object.freeze({
   NONE: 'none',
+  WHITE: 'white',
+  BLACK: 'black',
+  KING: 'king',
+  QUEEN: 'queen',
+  ROOK: 'rook',
+  KNIGHT: 'knight',
+  BISHOP: 'bishop',
+  PAWN: 'pawn',
   W_KING: 'white-king',
   W_QUEEN: 'white-queen',
   W_ROOK: 'white-rook',
