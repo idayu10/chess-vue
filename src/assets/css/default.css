@@ -16,6 +16,10 @@
   width: 60px;
   height: 60px;
 }
+.small-box {
+  width: 20px;
+  height: 20px;
+}
 .letter-x {
   width: 60px;
   text-align: center;

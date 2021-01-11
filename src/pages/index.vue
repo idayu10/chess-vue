@@ -6,28 +6,42 @@
       :highlight="highlight"
       @emit-click="emitClick"
     />
+    <side-area
+      v-model="color"
+      :mode="mode"
+      @emit-click-default="emitClickDefault"
+      @emit-click-undo="emitClickUndo"
+      @emit-click-first="emitClickToFirst"
+      @emit-click-edit="emitClickEdit"
+      @emit-click-end="emitClickEnd"
+    />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'nuxt-property-decorator';
 import piece from '@/resources/const/piece';
+import mode from '@/resources/const/mode';
 import MoveUtil from '@/util/move-util';
 
 @Component({
   components: {
     TopHeader :() => import('@/components/common/header/TopHeader.vue'),
-    Board :() => import('@/components/common/Board.vue')
+    Board :() => import('@/components/common/Board.vue'),
+    SideArea :() => import('@/components/common/SideArea.vue')
   }
 })
 export default class Index extends Vue {
   board: string[][] = [];
   highlight: number[][] = [];
   color: string = piece.WHITE;
+  records: string[][][] = [];
+  mode: string = mode.GAME;
 
   created():void {
     this.clearBoard();
     this.resetBoard();
+    this.records.push(this._.cloneDeep(this.board));
   }
 
   clearBoard(): void {
@@ -53,17 +67,27 @@ export default class Index extends Vue {
   }
 
   async emitClick(row: number, column: number): Promise<void> {
-    if (this.highlight.length === 0) {
-      // 可能手の検索
-      this.searchBoard(row, column);
-    } else {
-      // 駒の移動
-      this.putPiece(row, column);
-      this.highlight = [];
-      await this.$nextTick();
-      if (!this.canMove(this.changeColor(this.color))) {
-        alert('checkmate')
+    if (this.mode === mode.GAME) {
+      if (this.highlight.length === 0) {
+        // 可能手の検索
+        this.searchBoard(row, column);
+      } else {
+        // 駒の移動
+        this.putPiece(row, column);
+        this.highlight = [];
+        await this.$nextTick();
+        if (!this.canMove(this.changeColor(this.color))) {
+          alert('checkmate')
+        }
       }
+    } else if (this.mode === mode.DELETE) {
+      const targetRow = this._.cloneDeep(this.board[row]);
+      targetRow[column] = piece.NONE;
+      this.board.splice(row, 1, targetRow);
+    } else {
+      const targetRow = this._.cloneDeep(this.board[row]);
+      targetRow[column] = this.mode;
+      this.board.splice(row, 1, targetRow);
     }
   }
 
@@ -115,6 +139,7 @@ export default class Index extends Vue {
 
     this.movePiece(this.highlight[0], [row, column], this.board);
     this.highlight = [];
+    this.records.push(this._.cloneDeep(this.board));
   }
 
   canMove(color: string): boolean {
@@ -192,6 +217,53 @@ export default class Index extends Vue {
 
   changeColor(color: string): string {
     return piece.WHITE === color ? piece.BLACK : piece.WHITE;
+  }
+
+  emitClickDefault(): void {
+    this.resetBoard();
+    this.records.splice(0, 1, this._.cloneDeep(this.board));
+    this.records.splice(1, this.records.length);
+  }
+
+  emitClickUndo(): void {
+    if (this.records.length < 2) {
+      return;
+    }
+    this.records.pop();
+    this.board = this._.cloneDeep(this.records[this.records.length - 1]);
+  }
+
+  emitClickToFirst(): void {
+    this.records.splice(1, this.records.length);
+    this.board = this._.cloneDeep(this.records[0]);
+  }
+
+  emitClickEdit(modeStr: string): void {
+    this.mode = modeStr;
+  }
+
+  emitClickEnd(): void {
+    let wKing = 0;
+    let bKing = 0;
+    for (let row = 0; row < 8; row++) {
+      for (let column = 0; column < 8; column++) {
+        const pieceTmp = this.board[row][column];
+        if (piece.W_KING === pieceTmp) {
+          wKing++;
+        }
+        if (piece.B_KING === pieceTmp) {
+          bKing++;
+        }
+      }
+    }
+
+    if (wKing === 1 && bKing === 1) {
+      this.mode = mode.GAME;
+      this.records.splice(0, 1, this._.cloneDeep(this.board));
+      this.records.splice(1, this.records.length);
+    } else {
+      alert('キングは白と黒1ずつ配置してください。')
+    }
   }
 }
 </script>
